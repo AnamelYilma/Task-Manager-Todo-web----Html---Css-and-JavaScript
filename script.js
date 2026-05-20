@@ -1,90 +1,88 @@
-let tasks = []
-let newTask = document.querySelector('#newTask')
+let tasks = [];
 const taskInput = document.querySelector('#taskInput')
-const addTask = () =>{
+let newTask = document.querySelector('#newTask')
+let tasklist = document.querySelector('#task-list')
+
+//add on Array when they find value from input 
+const addTask = (e) => { 
+    e.preventDefault()
     const text = taskInput.value.trim()
-    if (text){
-        tasks.push({
-            text:text ,
-            completed:false 
-        });
-        UpdateStats()
-        console.log('Task added. Total tasks:', tasks);
+    if (text != ''){
+    tasks.push({
+        text:text,
+        completed:false,
+        id: Date.now()
+        
+    }) 
+    Display()
+    updateProg()
+}
+    taskInput.value= '';
+
+}
+//event btn and enter 
+newTask.addEventListener('click', addTask)
+taskInput.addEventListener('keypress' ,(e) =>{
+    if (e.key == 'Enter'){
+        addTask(e)
     }
-    console.log(tasks);
-    UpdateTaskList() 
-   
-
 }
-newTask.addEventListener('click' ,(e)=>{
-            addTask()
-            taskInput.value = '';
-
+)
+//Display creating html code when task add on array 
+let Display = () =>{
+    
+    tasklist.innerHTML ='';
+    tasks.forEach((task,index) => {
+        let crtli = document.createElement('li')
+        crtli.innerHTML = `
+                <div class="taskitem ${ task.completed ? 'completed' : ''}" >
+                    <div class="tasks" >
+                        <input type="checkbox" name="checkbox" id="checkboxid" class="checkbox" ${ task.completed ? 'checked' : '' } />
+                        <p id="taskText">${ task.text}</p>
+                    </div>
+                    <div class="icons">
+                        <img src="image/edit.png" alt="" onclick="edit(${index})" srcset="">
+                        <img src="image/delete.png" alt="" onclick="delet(${index})" srcset="">
+                    </div>
+                </div>
+        `
+        let chkbx = crtli.querySelector('.checkbox')
+        chkbx.addEventListener('change',() => {
+            tasks[index].completed = !tasks[index].completed
+            updateProg()  // Update progress bar
+            Display()
         })
-taskInput.addEventListener('keypress' ,(e)=>{
-        if (e.key === 'Enter'){
-            addTask()
-            taskInput.value = '';
+        tasklist.appendChild(crtli)
 
-        }
     })
-const toggleTaskComplete = (index) =>{
-    tasks[index].completed = !tasks[index].completed
-    UpdateTaskList()
-    UpdateStats()
 
 }
-const deleteTask = (index) => {
-    tasks.splice(index,1);
-    UpdateTaskList()
-    UpdateStats()
+
+
+let delet = (index) =>{
+  tasks.splice(index,1)
+  Display()
+  updateProg()
+
+
 }
-const editiTask = (index) =>{
-    const taskInput = document.querySelector('#taskInput')
+let edit = (index) => {
     taskInput.value = tasks[index].text
 
-    tasks.splice(index,1);
-    UpdateTaskList()
-    UpdateStats()
-}
-
-const UpdateStats = () =>{
-
-    const completeTasks = tasks.filter(task => task.completed).length
-    const TotalTasks = tasks.length
-
-    const progress = TotalTasks > 0 ? (completeTasks / TotalTasks)*100: 0 ;
-    const progressBar = document.querySelector('#progress')
-    const numbersDisplay = document.querySelector('#numbers')
-    progressBar.style.width = `${progress}%`
-    numbersDisplay.textContent = `${completeTasks} / ${TotalTasks}`
-    console.log("Variable values:", { completeTasks, TotalTasks, progress })
+    
+    tasks.splice(index,1)
+    Display()
+    updateProg()
 
 }
-const UpdateTaskList = () => {
-    const tasklist = document.querySelector('#task-list')
-    tasklist.textContent = '';
-    tasks.forEach((task,index) => {
-        const listitem = document.createElement('li')
-        listitem.innerHTML = `
-        <div class="taskltem ${task.completed ? 'completed' : '' }">
-            <div class="task">
-                <input type="checkbox" class="checkbox" ${ task.completed ? 'checked' : '' } />
-                <p class="${task.completed ? 'completed' : ''}" >${task.text}</p>
-            </div>
-            <div class="icons">
-                <img src="./image/edit.png" onclick ='editiTask(${index})' />
-                <img src="./image/delete.png" onclick ='deleteTask(${index})'/>
-            </div>
-        </div> `;
-        const checkbox = listitem.querySelector('.checkbox')
-        checkbox.addEventListener(
-            "change" , ()=> toggleTaskComplete(index) 
-        )
-        tasklist.append(listitem);
-    })
+let updateProg = () => {
+    let compTask = tasks.filter(task => task.completed).length
+    let TotalTask = tasks.length
+    let progressjs = TotalTask > 0 ? (compTask / TotalTask)*100 :0;
+
+    let progressbar = document.querySelector('#progress')
+    let numbers = document.querySelector('#numbers')
+    progressbar.style.width = `${progressjs}%`;
+    numbers.textContent = `${compTask} / ${TotalTask}`
+
 }
-newTask.addEventListener("click"  , e =>  {
-    e.preventDefault();
-    addTask()
-})
